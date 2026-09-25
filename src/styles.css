@@ -545,3 +545,8 @@ button.link {
 .end-game {
   margin-top: 20px;
 }
+
+.evil-team {
+  border-color: var(--evil);
+  background: #2a1418;
+}

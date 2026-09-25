@@ -108,6 +108,20 @@ function playerView(game, player) {
     })),
     chat: isNight ? game.chats[player.id] ?? [] : [],
     chatOpen,
+    evilTeam: evilTeamFor(game, player),
+  };
+}
+
+// With 7+ players, evil players learn who is on their team: which player is
+// the Demon and which are Minions, but not the Minions' specific roles.
+function evilTeamFor(game, player) {
+  if (game.phase === 'lobby' || game.players.length < 7) return null;
+  const teamOf = (p) => ROLE_BY_ID[p.roleId]?.team;
+  if (!['minion', 'demon'].includes(teamOf(player))) return null;
+  const others = game.players.filter((p) => p.id !== player.id);
+  return {
+    demons: others.filter((p) => teamOf(p) === 'demon').map((p) => p.name),
+    minions: others.filter((p) => teamOf(p) === 'minion').map((p) => p.name),
   };
 }
 

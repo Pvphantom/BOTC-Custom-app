@@ -58,6 +58,7 @@ export default function PlayerView({ game }) {
         <>
           {phase === 'night' && <NightPanel game={game} hasMessage={hasNightMessage} />}
           <RoleCard role={me.role} />
+          {game.evilTeam && <EvilTeam team={game.evilTeam} />}
         </>
       )}
       {tab === 'town' && <TownList players={game.players} meId={me.id} />}
@@ -88,6 +89,21 @@ function NightPanel({ game, hasMessage }) {
         onSend={(text) => send('player:message', { text })}
       />
       {!game.chatOpen && <p className="muted small center">Go back to sleep.</p>}
+    </div>
+  );
+}
+
+function EvilTeam({ team }) {
+  const list = (names) => (names.length ? names.join(', ') : 'None');
+  return (
+    <div className="card evil-team">
+      <h3 className="evil-text">Your evil team</h3>
+      <p>
+        <span className="muted">Demon:</span> <strong>{list(team.demons)}</strong>
+      </p>
+      <p>
+        <span className="muted">Other Minions:</span> <strong>{list(team.minions)}</strong>
+      </p>
     </div>
   );
 }
