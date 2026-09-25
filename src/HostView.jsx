@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { send } from './socket.js';
 import { ROLES, ROLE_BY_ID, TEAMS, FIRST_NIGHT_ORDER, OTHER_NIGHT_ORDER } from '../shared/roles.js';
-import { Chat, PhaseLabel, RoleChip, ScriptList, Tabs } from './components/shared.jsx';
+import { Chat, PhaseLabel, RoleChip, ScriptList, SeatingCircle, Tabs, aliveNeighbours } from './components/shared.jsx';
 
 // Show errors from the server without blocking the UI.
 async function act(event, payload) {
@@ -92,16 +92,22 @@ function Lobby({ game }) {
       <div className="card">
         <h3>Players</h3>
         {n === 0 && <p className="muted">No one has joined yet.</p>}
+        {n > 1 && <p className="muted small">Use ▲▼ to put players in the order they are sitting, clockwise.</p>}
+        {n > 2 && <SeatingCircle players={game.players} />}
         <ul className="assign">
-          {game.players.map((p) => (
+          {game.players.map((p, i) => (
             <li key={p.id}>
               <div className="assign-top">
                 <strong>
-                  {p.name} {!p.connected && <span className="muted small">(offline)</span>}
+                  <span className="muted">{i + 1}.</span> {p.name}{' '}
+                  {!p.connected && <span className="muted small">(offline)</span>}
                 </strong>
-                <button className="link" onClick={() => confirm(`Remove ${p.name}?`) && act('host:kick', { playerId: p.id })}>
-                  remove
-                </button>
+                <span className="row">
+                  <SeatButtons playerId={p.id} />
+                  <button className="link" onClick={() => confirm(`Remove ${p.name}?`) && act('host:kick', { playerId: p.id })}>
+                    remove
+                  </button>
+                </span>
               </div>
               <RoleSelect
                 value={p.roleId}
@@ -126,6 +132,19 @@ function Lobby({ game }) {
 
       <EndGame />
     </main>
+  );
+}
+
+function SeatButtons({ playerId }) {
+  return (
+    <>
+      <button className="seat-btn" aria-label="Move up" onClick={() => act('host:moveSeat', { playerId, direction: -1 })}>
+        ▲
+      </button>
+      <button className="seat-btn" aria-label="Move down" onClick={() => act('host:moveSeat', { playerId, direction: 1 })}>
+        ▼
+      </button>
+    </>
   );
 }
 
@@ -189,6 +208,7 @@ function Grimoire({ game }) {
             onChange={setTab}
             tabs={[
               { id: 'players', label: 'Grimoire', dot: game.players.some(unread) },
+              { id: 'seats', label: 'Seats' },
               { id: 'order', label: 'Night order' },
               { id: 'script', label: 'All roles' },
             ]}
@@ -236,6 +256,7 @@ function Grimoire({ game }) {
               ))}
             </ul>
           )}
+          {tab === 'seats' && <Seats game={game} />}
           {tab === 'order' && <NightOrder game={game} />}
           {tab === 'script' && <ScriptList />}
           <EndGame />
@@ -285,6 +306,28 @@ function HostChat({ game, player, onClose }) {
   );
 }
 
+function Seats({ game }) {
+  return (
+    <div className="card">
+      <h3>Seating</h3>
+      <SeatingCircle players={game.players} label={(p) => `${ROLE_BY_ID[p.roleId]?.icon ?? ''} ${p.name}`} />
+      <ul className="seat-order">
+        {game.players.map((p, i) => (
+          <li key={p.id} className={p.alive ? '' : 'dead'}>
+            <span className="seat-num">{i + 1}.</span>
+            <span className="grow">
+              {p.alive ? '' : '💀 '}
+              {p.name}
+            </span>
+            <SeatButtons playerId={p.id} />
+          </li>
+        ))}
+      </ul>
+      <p className="muted small">Players see this order on their Town tab.</p>
+    </div>
+  );
+}
+
 function NightOrder({ game }) {
   const first = game.nightNumber <= 1;
   const order = first ? FIRST_NIGHT_ORDER : OTHER_NIGHT_ORDER;
@@ -307,6 +350,8 @@ function NightOrder({ game }) {
                   → {p.name}
                   {p.roleId === 'drunk' ? ' (Drunk)' : ''}
                   {!p.alive ? ' 💀' : ''}
+                  {step === 'empath' &&
+                    ` · neighbours: ${aliveNeighbours(game.players, p.id).map((x) => x.name).join(' & ') || 'none'}`}
                 </span>
               ))}
             </li>

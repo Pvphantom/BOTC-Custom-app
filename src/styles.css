@@ -550,3 +550,89 @@ button.link {
   border-color: var(--evil);
   background: #2a1418;
 }
+
+/* Seating circle */
+.circle {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1;
+  margin: 8px auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 162, 74, 0.08) 0%, transparent 70%);
+}
+.seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 72px;
+  text-align: center;
+}
+.seat-token {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--parchment);
+  color: #1a1218;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 2px solid var(--border);
+}
+.seat.me .seat-token {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.35);
+}
+.seat.dead .seat-token {
+  background: #333;
+}
+.seat.dead {
+  opacity: 0.6;
+}
+.seat-name {
+  font-size: 0.75rem;
+  line-height: 1.15;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.circle-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.seat-order {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.seat-order li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.seat-order li:last-child {
+  border-bottom: none;
+}
+.seat-order .seat-num {
+  width: 24px;
+  color: var(--muted);
+}
+.seat-order .grow {
+  flex: 1;
+}
+.seat-order button {
+  padding: 6px 12px;
+}
+.seat-btn {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}

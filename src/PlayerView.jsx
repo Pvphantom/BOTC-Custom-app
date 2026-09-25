@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { send } from './socket.js';
-import { Chat, PhaseLabel, RoleCard, ScriptList, Tabs } from './components/shared.jsx';
+import { Chat, PhaseLabel, RoleCard, ScriptList, SeatingCircle, Tabs } from './components/shared.jsx';
 
 export default function PlayerView({ game }) {
   const { me, phase } = game;
@@ -61,7 +61,15 @@ export default function PlayerView({ game }) {
           {game.evilTeam && <EvilTeam team={game.evilTeam} />}
         </>
       )}
-      {tab === 'town' && <TownList players={game.players} meId={me.id} />}
+      {tab === 'town' && (
+        <>
+          <div className="card">
+            <h3>Seating</h3>
+            <SeatingCircle players={game.players} highlightId={me.id} />
+          </div>
+          <TownList players={game.players} meId={me.id} />
+        </>
+      )}
       {tab === 'script' && <ScriptList />}
       {tab === 'notes' && <Notes code={game.code} playerId={me.id} locked={notesLocked} phase={phase} />}
     </main>
@@ -114,10 +122,11 @@ export function TownList({ players, meId }) {
     <div className="card">
       <h3>Players ({players.length})</h3>
       <ul className="town">
-        {players.map((p) => (
+        {players.map((p, i) => (
           <li key={p.id} className={p.alive ? '' : 'dead'}>
             <span>
-              {p.alive ? '🙂' : '💀'} {p.name}
+              <span className="muted">{i + 1}.</span> {p.alive ? '' : '💀 '}
+              {p.name}
               {p.id === meId && <span className="muted"> (you)</span>}
             </span>
             <span className="muted small">

@@ -100,6 +100,44 @@ export function Chat({ messages, mine, onSend, canSend, placeholder }) {
   );
 }
 
+// Players drawn around a circle in seating order, clockwise from the top.
+export function SeatingCircle({ players, highlightId, label = (p) => p.name }) {
+  const n = players.length;
+  return (
+    <div className="circle">
+      {players.map((p, i) => {
+        const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+        const style = { left: `${50 + 40 * Math.cos(angle)}%`, top: `${50 + 40 * Math.sin(angle)}%` };
+        return (
+          <div
+            key={p.id}
+            className={`seat ${p.alive ? '' : 'dead'} ${p.id === highlightId ? 'me' : ''}`}
+            style={style}
+          >
+            <span className="seat-token">{p.alive ? i + 1 : '💀'}</span>
+            <span className="seat-name">{label(p)}</span>
+          </div>
+        );
+      })}
+      <span className="circle-center muted small">clockwise ↻</span>
+    </div>
+  );
+}
+
+// The nearest living player on each side, skipping the dead (used by the Empath).
+export function aliveNeighbours(players, playerId) {
+  const n = players.length;
+  const i = players.findIndex((p) => p.id === playerId);
+  const find = (step) => {
+    for (let k = 1; k < n; k++) {
+      const p = players[(i + step * k + n) % n];
+      if (p.alive && p.id !== playerId) return p;
+    }
+    return null;
+  };
+  return [find(-1), find(1)].filter(Boolean);
+}
+
 export function Tabs({ tabs, value, onChange }) {
   return (
     <nav className="tabs">

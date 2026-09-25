@@ -264,6 +264,16 @@ io.on('connection', (socket) => {
     randomizeRoles(game);
   }));
 
+  // The players array is the seating order, clockwise around the circle.
+  socket.on('host:moveSeat', hostOnly(({ playerId, direction }) => {
+    const from = game.players.findIndex((p) => p.id === playerId);
+    if (from === -1) return 'Player not found';
+    const n = game.players.length;
+    const to = (from + (direction < 0 ? -1 : 1) + n) % n;
+    const [p] = game.players.splice(from, 1);
+    game.players.splice(to, 0, p);
+  }));
+
   socket.on('host:kick', hostOnly(({ playerId }) => {
     game.players = game.players.filter((p) => p.id !== playerId);
     delete game.chats[playerId];
