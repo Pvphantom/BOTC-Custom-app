@@ -104,6 +104,7 @@ function EvilTeam({ team }) {
       <p>
         <span className="muted">Other Minions:</span> <strong>{list(team.minions)}</strong>
       </p>
+      <p className="muted small">This disappears at dawn. Remember it.</p>
     </div>
   );
 }

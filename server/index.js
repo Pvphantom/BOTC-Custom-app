@@ -114,8 +114,9 @@ function playerView(game, player) {
 
 // With 7+ players, evil players learn who is on their team: which player is
 // the Demon and which are Minions, but not the Minions' specific roles.
+// It is only shown during the first night; after that they must remember it.
 function evilTeamFor(game, player) {
-  if (game.phase === 'lobby' || game.players.length < 7) return null;
+  if (game.phase !== 'night' || game.nightNumber !== 1 || game.players.length < 7) return null;
   const teamOf = (p) => ROLE_BY_ID[p.roleId]?.team;
   if (!['minion', 'demon'].includes(teamOf(player))) return null;
   const others = game.players.filter((p) => p.id !== player.id);
